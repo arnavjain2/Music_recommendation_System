@@ -53,10 +53,16 @@ def plot_latent_3d(latent_features, df):
 
 def recommend_tracks(track_index, df, latent_features, knn):
     track_vector = latent_features[track_index].reshape(1, -1)
-    distances, indices = knn.kneighbors(track_vector, n_neighbors=10)
-    similar_indices = indices.flatten()[1:]
+    distances, indices = knn.kneighbors(track_vector, n_neighbors=30)  # Use a higher number initially
+    similar_indices = indices.flatten()[1:]  # Skip the first (it’s the selected track itself)
+    
     similar_tracks = df.iloc[similar_indices]
-    return similar_tracks[['track_name', 'artists', 'track_genre']]
+    
+    # Drop duplicates based on both track name and artist
+    unique_tracks = similar_tracks.drop_duplicates(subset=['track_name', 'artists']).head(9)
+    
+    return unique_tracks[['track_name', 'artists', 'track_genre']]
+
 
 with tab1:
     st.subheader("Get Track Recommendations")
